@@ -1,4 +1,10 @@
+BETA_SHAPE_PARAMETER_A = 2.0
+BETA_SHAPE_PARAMETER_B = 2.0
+
+REWARD_ADD_TO_CART = 1.0
+
 CATEGORIES = ["bags", "necklaces", "t-shirts", "jumpers", "cardigans", "skirts"]
+
 TEST_MESSAGES = [{
                 "data": {
                     "product_action": {

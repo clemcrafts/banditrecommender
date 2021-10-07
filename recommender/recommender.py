@@ -1,5 +1,9 @@
-from . import CATEGORIES, TEST_MESSAGES
 from scipy.stats import beta
+from . import (CATEGORIES,
+               TEST_MESSAGES,
+               BETA_SHAPE_PARAMETER_A,
+               BETA_SHAPE_PARAMETER_B,
+               REWARD_ADD_TO_CART)
 
 
 class Recommender:
@@ -30,15 +34,6 @@ class Recommender:
         """
         return self.consumer.consume(num_messages=2, timeout=1)
 
-    def _init_arms(self, session_id):
-        """
-        Initialisation of arms (categories) with beta distributions parameters.
-        :param str session_id: the session ID of the user to recommend for.
-        """
-        self.user_profiles[session_id] = {}
-        for category in CATEGORIES:
-            self.user_profiles[session_id][category] = (2, 2)
-
     def _process(self, messages):
         """
         Consuming a batch of messages ingested.
@@ -48,10 +43,7 @@ class Recommender:
             category = self._get_category(message)
             session_id = self._get_session_id(message)
             reward = self._get_reward(message)
-            try:
-                self._update_arm(session_id, category, reward)
-            except KeyError:
-                self._init_arms(session_id)
+            self._update_arm(session_id, category, reward)
             print(self._get_recommendations(session_id))
 
     def _get_reward(self, message):
@@ -62,7 +54,7 @@ class Recommender:
         """
         reward = 0
         if message["data"]["product_action"]["action"] == "add_to_cart":
-            reward = 1
+            reward = REWARD_ADD_TO_CART
         return reward
 
     def _get_category(self, message):
@@ -81,13 +73,28 @@ class Recommender:
         """
         return message["session_id"]
 
+    def _init_arms(self, session_id):
+        """
+        Initialisation of arms (categories) with shape parameters.
+        This is necessary for a new user.
+        :param str session_id: the session ID of the user to recommend for.
+        """
+        self.user_profiles[session_id] = {}
+        for category in CATEGORIES:
+            self.user_profiles[session_id][category] = (
+                BETA_SHAPE_PARAMETER_A,
+                BETA_SHAPE_PARAMETER_B)
+
     def _update_arm(self, session_id, category, reward):
         """
         Updating arm based on reward received.
+        n.b: if user not known, we initialise the distributions first.
         :param str session_id: the session ID.
         :param str category: the category of the message.
         :param float reward: the reward associated with the action.
         """
+        if session_id not in self.user_profiles.keys():
+           self._init_arms(session_id)
         self.user_profiles[session_id][category] = (
             self.user_profiles[session_id][category][0] + reward,
             self.user_profiles[session_id][category][1] + (1 - reward))
@@ -100,7 +107,6 @@ class Recommender:
         :param int top: the number of recommendations we want (e.g: top 5)
         :return list recommendations: list of top categories based on TS.
         """
-
         categories = list(self.user_profiles[session_id].items())
         categories.sort(
             key=lambda category: beta.rvs(
