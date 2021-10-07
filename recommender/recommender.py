@@ -96,12 +96,14 @@ class Recommender:
         """
         Getting the recommendations based on Thomson Sampling (TS).
         i.e: we generate random values for each category and pick the top ones.
+        :param str session_id: the session ID of the user to recommend for.
+        :param int top: the number of recommendations we want (e.g: top 5)
         :return list recommendations: list of top categories based on TS.
         """
 
-        top_categories = list(self.user_profiles[session_id].items())
-        top_categories.sort(
+        categories = list(self.user_profiles[session_id].items())
+        categories.sort(
             key=lambda category: beta.rvs(
                 category[1][0], category[1][1], size=1)[0],
             reverse=True)
-        return [category[0] for category in top_categories[:top]]
+        return [category[0] for category in categories[:top]]
