@@ -3,6 +3,8 @@ from . import (CATEGORIES,
                TEST_MESSAGES,
                BETA_SHAPE_PARAMETER_A,
                BETA_SHAPE_PARAMETER_B,
+               KAFKA_CONSUMER_SIZE,
+               KAFKA_CONSUMER_TIMEOUT,
                REWARD_ADD_TO_CART)
 
 
@@ -32,11 +34,13 @@ class Recommender:
         """
         Consume Kafka messages by batches.
         """
-        return self.consumer.consume(num_messages=2, timeout=1)
+        return self.consumer.consume(
+            num_messages=KAFKA_CONSUMER_SIZE,
+            timeout=KAFKA_CONSUMER_TIMEOUT)
 
     def _process(self, messages):
         """
-        Consuming a batch of messages ingested.
+        Processing messages ingested.
         :param list messages: a list of messages to process.
         """
         for message in messages:
@@ -75,7 +79,7 @@ class Recommender:
 
     def _init_arms(self, session_id):
         """
-        Initialisation of arms (categories) with shape parameters.
+        Initialisation of arms (category distributions) with shape parameters.
         This is necessary for a new user.
         :param str session_id: the session ID of the user to recommend for.
         """
@@ -87,8 +91,12 @@ class Recommender:
 
     def _update_arm(self, session_id, category, reward):
         """
-        Updating arm based on reward received.
-        n.b: if user not known, we initialise the distributions first.
+        Updating arm (category distribution) based on reward received.
+        if user not known, we initialise the distributions first.
+        n.b: this is the raw raw version. Here discount parameters can be
+        included (gamma) to increase or decreases the intensity of rewards.
+        It's also possible to use fancier formulas based on data we know
+        from the user.
         :param str session_id: the session ID.
         :param str category: the category of the message.
         :param float reward: the reward associated with the action.
@@ -102,7 +110,10 @@ class Recommender:
     def _get_recommendations(self, session_id, top=5):
         """
         Getting the recommendations based on Thomson Sampling (TS).
-        i.e: we generate random values for each category and pick the top ones.
+        i.e: we generate a random value for each category distribution and
+        pick the top ones (i.e: the greatest values). This TS step takes into
+        account the arms that have been rewarded the most but also leaves a
+        chance to the others thanks to a random value generation.
         :param str session_id: the session ID of the user to recommend for.
         :param int top: the number of recommendations we want (e.g: top 5)
         :return list recommendations: list of top categories based on TS.

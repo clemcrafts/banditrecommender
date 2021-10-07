@@ -5,6 +5,9 @@ REWARD_ADD_TO_CART = 1.0
 
 CATEGORIES = ["bags", "necklaces", "t-shirts", "jumpers", "cardigans", "skirts"]
 
+KAFKA_CONSUMER_SIZE = 2
+KAFKA_CONSUMER_TIMEOUT = 1
+
 TEST_MESSAGES = [{
                 "data": {
                     "product_action": {
