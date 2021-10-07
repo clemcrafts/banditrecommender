@@ -52,7 +52,7 @@ class Recommender:
                 self._update_arm(session_id, category, reward)
             except KeyError:
                 self._init_arms(session_id)
-            return self._get_recommendations(session_id)
+            print(self._get_recommendations(session_id))
 
     def _get_reward(self, message):
         """
