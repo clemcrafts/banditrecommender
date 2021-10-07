@@ -1,11 +1,7 @@
 from scipy.stats import beta
-from . import (CATEGORIES,
-               TEST_MESSAGES,
-               BETA_SHAPE_PARAMETER_A,
-               BETA_SHAPE_PARAMETER_B,
-               KAFKA_CONSUMER_SIZE,
-               KAFKA_CONSUMER_TIMEOUT,
-               REWARD_ADD_TO_CART)
+from . import (CATEGORIES, TEST_MESSAGES, BETA_SHAPE_PARAMETER_A,
+               BETA_SHAPE_PARAMETER_B, KAFKA_CONSUMER_SIZE,
+               KAFKA_CONSUMER_TIMEOUT, REWARD_ADD_TO_CART)
 
 
 class Recommender:
