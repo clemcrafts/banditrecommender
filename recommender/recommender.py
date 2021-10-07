@@ -28,9 +28,9 @@ class Recommender:
             self._process(TEST_MESSAGES)
             it +=1
 
-    def _ingest_kafka(self):
+    def _consume_messages(self):
         """
-        Ingest Kafka messages by batches.
+        Consume Kafka messages by batches.
         """
         return self.consumer.consume(num_messages=2, timeout=1)
 
