@@ -1,46 +1,39 @@
-from . import CATEGORIES
+from . import CATEGORIES, TEST_MESSAGES
 from scipy.stats import beta
 
 
 class Recommender:
+    """
+    Class in charge of multi-armed bandit recommendations.
+    See: https://en.wikipedia.org/wiki/Multi-armed_bandit
+    """
 
     def __init__(self):
+        """
+        Setting up consumer and user profiles.
+        """
         self.consumer = None
         self.user_profiles = {}
 
     def run(self):
+        """
+        Run the recommender.
+        """
         it = 0
         while it<100:
+            self._process(TEST_MESSAGES)
             it +=1
-            messages = [{
-                "data": {
-                    "product_action": {
-                        "action": "add_to_cart",
-                        "products": [{
-                            "id": "P10000",
-                            "name": "Black skirt",
-                            "brand": "N/A",
-                            "category": "skirts",
-                            "price": 16.0,
-                            "quantity": 1.0,
-                            "total_product_amount": 16.0
-                        }]
-                    },
-                },
-                "session_id": "11223344",
-            }]
-            self._process(messages)
 
     def _ingest_kafka(self):
         """
-        The user can control the size of the batch and the timeout from the
-        configuration file.
+        Ingest Kafka messages by batches.
         """
         return self.consumer.consume(num_messages=2, timeout=1)
 
     def _init_arms(self, session_id):
         """
         Initialisation of arms (categories) with beta distributions parameters.
+        :param str session_id: the session ID of the user to recommend for.
         """
         self.user_profiles[session_id] = {}
         for category in CATEGORIES:
@@ -48,9 +41,8 @@ class Recommender:
 
     def _process(self, messages):
         """
-        Consuming a batch of messages.
-        :param list messages: a list of messages ("batches") to process.
-        e.g: [<kafka.cimpl_1>, <kafka.cimpl_2>, <kafka.cimpl_3>]
+        Consuming a batch of messages ingested.
+        :param list messages: a list of messages to process.
         """
         for message in messages:
             category = self._get_category(message)
