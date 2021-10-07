@@ -62,7 +62,6 @@ class Recommender:
                 self._init_arms(session_id)
             return self._get_recommendations(session_id)
 
-
     def _get_reward(self, message):
         """
         Getting the action reward depending on message type.
@@ -77,20 +76,26 @@ class Recommender:
     def _get_category(self, message):
         """
         Getting the category of the product ingested.
-        :param message:
-        :return:
+        :param dict message: the message received from mparticles.
+        :return str category: the category of the message.
         """
         return message["data"]["product_action"]["products"][0]["category"]
 
     def _get_session_id(self, message):
         """
         Getting the session ID of the user.
-        :param message:
-        :return:
+        :param dict message: the message received from mparticles.
+        :return str category: the session ID of the message.
         """
         return message["session_id"]
 
     def _update_arm(self, session_id, category, reward):
+        """
+        Updating arm based on reward received.
+        :param str session_id: the session ID.
+        :param str category: the category of the message.
+        :param float reward: the reward associated with the action.
+        """
         self.user_profiles[session_id][category] = (
             self.user_profiles[session_id][category][0] + reward,
             self.user_profiles[session_id][category][1] + (1 - reward))
